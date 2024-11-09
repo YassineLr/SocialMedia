@@ -1,0 +1,102 @@
+################################ AUTHETICATION ####################################
+
+>> about django authentication Framework
+
+
+Django comes with a built-in authentication framework that can handle user
+authentication, sessions, permissions, and user groups. The authentication system
+includes views for common user actions such as login, logout, change password,
+and reset password.
+
+The authentication framework is located at django.contrib.auth and is used by
+other Django contrib packages. Remember that you already used the authentication
+framework in Chapter 1, Building a Blog Application to create a superuser for your blog
+application to access the administration site.
+When you create a new Django project using the startproject command, the
+authentication framework is included in the default settings of your project. It
+consists of the django.contrib.auth application and the following two middleware
+classes found in the MIDDLEWARE_CLASSES setting of your project:
+      •AuthenticationMiddleware: Associates users with requests
+      •SessionMiddleware: Handles the current session across requests using sessions
+A middleware is a class with methods that are globally executed during the request
+or response phase. You will use middleware classes on several occasions throughout
+this book. You will learn to create custom middlewares in Chapter 13, Going Live.
+The authentication framework also includes the following models:
+•User: A user model with basic fields; the main fields of this model are: 
+                              username, password, email, first_name, last_name, and is_active.
+•Group: A group model to categorize users.
+•Permission: Flags to perform certain actions.
+
+
+>> login 
+
+first of all we need to create a login-form :
+
+>>>   from django import forms
+>>>   class LoginForm(forms.Form):
+
+>>>       username = forms.CharField()
+>>>       password = forms.CharField(widget=forms.PasswordInput)
+
+after that we need to handle the the form input in a login-view :
+
+>>>     from django.shortcuts import render
+>>>     from django.http import HttpResponse
+>>>     from django.contrib.auth import authenticate,login
+>>>     from .forms import LoginForm
+>>>     
+>>>     # Create your views here.
+>>>     
+>>>     def user_login(request):
+>>>         if request.method == 'POST':
+>>>             form = LoginForm(request.POST)
+>>>             if form.is_valid():
+>>>                 cd = form.cleaned_data
+>>>                 user = authenticate(username=cd['username'],
+>>>                                     password=cd['password'])
+>>>                 if user is not None:
+>>>                     if user.is_active:
+>>>                         login(request, user)
+>>>                         return HttpResponse('Authentificated successfully')
+>>>                     else :
+>>>                         return HttpResponse('Disabled account')
+>>>                 else :
+>>>                     return HttpResponse('invalid login')
+>>>         else :
+>>>             form = LoginForm()
+>>>         return render(request, 'account/login.html',{'form':form})
+
+This is what our basic log in view does: 
+when the user_login view is called with a GET request, we instantiate 
+a new log in form with form = LoginForm() to display it in the template. 
+When the user submits the form via POST, we perform
+
+the following actions:
+    1. Instantiate the form with the submitted data with form =
+        LoginForm(request.POST).
+    2. Check if the form is valid. If it is not valid, we display the form errors in our
+        template (for example, if user did not fill one of the fields).
+    3. If the submitted data is valid, we authenticate the user against the database
+        by using the authenticate() method. This method takes a username
+        and a password and returns a User object if the user has been successfully
+        authenticated, or None otherwise. If the user has not been authenticated,
+        we return a raw HttpResponse displaying a message.
+    4. If the user was successfully authenticated, we check if the user is active
+        accessing its is_active attribute. This is an attribute of Django's User
+        model. If the user is not active, we return an HttpResponse displaying
+        the information.
+    5. If the user is active, we log the user into the website. We set the user in the
+        session by calling the login() method and return a success message.
+
+:=========:: Note the difference between authenticate and login::================:
+    -- authenticate() checks user credentials and returns a user object
+    -- if they are right; login() sets the user in the current session.
+
+>>>     from django.conf.urls import url
+>>>     from . import views
+
+>>>     urlpatterns = [
+>>>           # post views
+>>>            url(r'^login/$', views.user_login, name='login'),
+>>>     ]
+
