@@ -3,6 +3,9 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate,login
 from .forms import LoginForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 
 
 # Create your views here.
@@ -26,11 +29,18 @@ from django.contrib.auth.decorators import login_required
 #         form = LoginForm()
 #     return render(request, 'account/login.html',{'form':form})
 
+
 # def user_logout(request):
 #     pass
 
+class CustomLoginView(LoginView):
+    def dispatch(self, request, *args, **kwargs):
+        # if self.request.user.is_authenticated:
+        #     return redirect(reverse_lazy('dashboard'))
+        return super().dispatch(request, *args, **kwargs)
 
-@login_required
+
+# @login_required
 def dashboard(request):
     return render(
                     request, 
