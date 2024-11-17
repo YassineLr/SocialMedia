@@ -54,18 +54,18 @@ def register(request):
             new_user = registerForm.save(commit=False)
             new_user.set_password(registerForm.cleaned_data['password'])
             new_user.save()
+            print(new_user)
             return render (
                 request,
                 'registration/register_done.html',
                 {'user_form': registerForm},
             )
-    else :
-        userForm = UserRegitrationForm()
-        return render (
-            request,
-            'registration/register.html',
-            {'user_form':userForm} 
-        )
+    userForm = UserRegitrationForm()
+    return render (
+        request,
+        'registration/register.html',
+        {'user_form':userForm} 
+    )
 
     
 

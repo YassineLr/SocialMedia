@@ -4,14 +4,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - django_data:/code
+      - ./bookmarks:/code
+      - ./bookmarks/db.sqlite3:/code/db.sqlite3
     env_file:
       - .env
     networks:
       - CP-network
     init: true
     restart: always
-  
+
 volumes:
   django_data:
 
