@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.contrib.auth import authenticate,login
-from .forms import LoginForm
+from django.contrib.auth import authenticate,login, logout
+from .forms import LoginForm, UserRegitrationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView , LogoutView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
@@ -39,6 +39,35 @@ class CustomLoginView(LoginView):
         #     return redirect(reverse_lazy('dashboard'))
         return super().dispatch(request, *args, **kwargs)
 
+
+def CostumLogoutView(request):
+    logout(request)
+    return render (
+        request,
+        'registration/logged_out.html',
+    )
+
+def register(request):
+    if request.method == 'POST':
+        registerForm = UserRegitrationForm(request.POST)
+        if registerForm.is_valid():
+            new_user = registerForm.save(commit=False)
+            new_user.set_password(registerForm.cleaned_data['password'])
+            new_user.save()
+            return render (
+                request,
+                'registration/register_done.html',
+                {'user_form': registerForm},
+            )
+    else :
+        userForm = UserRegitrationForm()
+        return render (
+            request,
+            'registration/register.html',
+            {'user_form':userForm} 
+        )
+
+    
 
 # @login_required
 def dashboard(request):

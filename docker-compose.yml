@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - django_data:/code
+    env_file:
+      - .env
+    networks:
+      - CP-network
+    init: true
+    restart: always
+  
+volumes:
+  django_data:
+
+networks:
+  CP-network:
+    name: CP-network
