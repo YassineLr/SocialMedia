@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth import authenticate,login, logout
-from .forms import LoginForm, UserRegitrationForm
+from .forms import LoginForm, UserRegitrationForm, UserEditForm, ProfileEditForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView , LogoutView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from .models import Profile
 
 
 # Create your views here.
@@ -42,10 +43,8 @@ class CustomLoginView(LoginView):
 
 def CostumLogoutView(request):
     logout(request)
-    return render (
-        request,
-        'registration/logged_out.html',
-    )
+    print(request)
+    return redirect('logout_done')
 
 def register(request):
     if request.method == 'POST':
@@ -54,7 +53,8 @@ def register(request):
             new_user = registerForm.save(commit=False)
             new_user.set_password(registerForm.cleaned_data['password'])
             new_user.save()
-            print(new_user)
+            profile = Profile.objects.create(user=new_user)
+            # print(new_user)
             return render (
                 request,
                 'registration/register_done.html',
@@ -69,10 +69,38 @@ def register(request):
 
     
 
-# @login_required
+@login_required
 def dashboard(request):
     return render(
                     request, 
                     'registration/dashboard.html', 
                     {'section':'dashboard'}
                 )
+
+@login_required
+def edit(request):
+    if request.method == 'POST':
+        userForm = UserEditForm(
+                                        instance=request.user, 
+                                        data=request.POST
+                                )
+        profileForm = ProfileEditForm(
+                                        instance=request.user.profile,
+                                        data=request.POST,
+                                        files=request.FILES
+                                    )
+        if userForm.is_valid() and profileForm.is_valid():
+            userForm.save()
+            profileForm.save()
+    else:
+        userForm = UserEditForm(instance=request.user)
+        profileForm = ProfileEditForm(instance=request.user.profile)
+    return render(
+        request,
+        'account/edit.html',
+        {
+            'user_form' : userForm,
+            'profile_form' : profileForm
+        }
+    )
+

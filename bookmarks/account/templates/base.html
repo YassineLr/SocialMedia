@@ -22,16 +22,13 @@
             </ul>
             {% endif %}
             <span class="user">
-            {% if request.user.is_authenticated %}
+                {% if request.user.is_authenticated %}
                 Hello {{ request.user.first_name }},
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
-            {% else %}
-            <a href="{% url "login" %}">Log-in</a>
-            {% endif %}
-            </span>
+                <a href="{% url "logout" %}">Logout</a>
+                {% else %}
+                <a href="{% url "login" %}">Log-in</a>
+                {% endif %}
+                </span>
             </div>
     <div id="content">
     {% block content %}
